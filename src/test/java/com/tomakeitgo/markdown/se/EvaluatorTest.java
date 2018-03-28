@@ -13,13 +13,44 @@ public class EvaluatorTest {
     @Before
     public void setUp() {
         evaluator = new Evaluator();
+
+
         Expression expression = new Expression();
         Expression definitionForP = new Expression();
         definitionForP.add(new Symbol("___define___"));
         definitionForP.add(new Symbol("p"));
-        definitionForP.add(new Symbol("(p "));
-        definitionForP.add(new Symbol(")"));
+        Expression arguments = new Expression();
+        arguments.add(new Symbol("text"));
+        definitionForP.add(arguments);
+        Expression body = new Expression();
+        body.add(new Symbol("(p"));
+        body.add(new Symbol("text"));
+        body.add(new Symbol(")"));
+        definitionForP.add(body);
         expression.add(definitionForP);
+        evaluator.eval(expression);
+
+        expression = new Expression();
+        Expression noArgsToSymbol = new Expression();
+        noArgsToSymbol.add(new Symbol("___define___"));
+        noArgsToSymbol.add(new Symbol("lostOfText"));
+        arguments = new Expression();
+        noArgsToSymbol.add(arguments);
+
+        noArgsToSymbol.add(new Symbol("text text text"));
+        expression.add(noArgsToSymbol);
+        evaluator.eval(expression);
+
+        expression = new Expression();
+        Expression oneArgPassThrough = new Expression();
+        oneArgPassThrough.add(new Symbol("___define___"));
+        oneArgPassThrough.add(new Symbol("passThrough"));
+        arguments = new Expression();
+        arguments.add(new Symbol("arg"));
+        oneArgPassThrough.add(arguments);
+
+        oneArgPassThrough.add(new Symbol("arg"));
+        expression.add(oneArgPassThrough);
         evaluator.eval(expression);
     }
 
@@ -59,6 +90,29 @@ public class EvaluatorTest {
         Symbol eval = evaluator.eval(expression);
 
         assertThat(eval, is(new Symbol("p token token")));
+    }
+
+    @Test
+    public void givenSubexpressionNoParametersExpectReduction() {
+        Expression expression = new Expression();
+        Expression subexpression = new Expression();
+        subexpression.add(new Symbol("lostOfText"));
+        expression.add(subexpression);
+        Symbol eval = evaluator.eval(expression);
+
+        assertThat(eval, is(new Symbol("text text text")));
+    }
+
+    @Test
+    public void givenSubexpressionOneParametersSymbolExpectReduction() {
+        Expression expression = new Expression();
+        Expression subexpression = new Expression();
+        subexpression.add(new Symbol("passThrough"));
+        subexpression.add(new Symbol("token"));
+        expression.add(subexpression);
+        Symbol eval = evaluator.eval(expression);
+
+        assertThat(eval, is(new Symbol("token")));
     }
 
     @Test
