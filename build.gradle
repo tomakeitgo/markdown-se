@@ -4,14 +4,14 @@ apply plugin: 'signing'
 
 group = 'com.tomakeitgo.markdown'
 archivesBaseName = "markdown-se"
-version = '1.0.0'
+version = '1.0.1'
 
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
+dependencies {K
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 

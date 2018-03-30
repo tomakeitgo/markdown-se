@@ -1,8 +1,0 @@
-(___define___ html ( body )  (<html> <body> body </body> </html>) )
-(___define___ p ( body ) (<div class='markdown-se p'> body </div>))
-
-(html
-    (p
-        hello world body
-    )
-)

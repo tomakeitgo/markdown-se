@@ -4,8 +4,10 @@ import java.util.*;
 
 class Evaluator {
 
+    private static final Symbol DEFINE = new Symbol("___define___");
     private static final Symbol DEFAULT_FUNCTION = new Symbol("___default___");
-    public static final Symbol DEFINE = new Symbol("___define___");
+    private static final Symbol NO_SPACES = new Symbol("___no_spaces___");
+    private static final Symbol PAREN = new Symbol("___paren___");
 
     private final Environment environment = new Environment();
 
@@ -45,7 +47,9 @@ class Evaluator {
         private final Map<Symbol, SEPart> symbols = new HashMap<>();
 
         void init() {
-            functions.put(DEFAULT_FUNCTION, new DefaultFunction());
+            functions.put(DEFAULT_FUNCTION, new DefaultFunction(" ", 0, "", ""));
+            functions.put(PAREN, new DefaultFunction(" ", 1, "(", ")"));
+            functions.put(NO_SPACES, new DefaultFunction("", 1, "", ""));
             functions.put(DEFINE, new Function() {
                 @Override
                 public Symbol eval(Expression args, Environment environment) {
@@ -96,21 +100,42 @@ class Evaluator {
     }
 
     class DefaultFunction implements Function {
+
+        private final String separator;
+        private final int skip;
+        private final String prefix;
+        private final String postfix;
+
+        DefaultFunction(String separator, int skip, String prefix, String postfix) {
+            this.separator = separator;
+            this.skip = skip;
+            this.prefix = prefix;
+            this.postfix = postfix;
+        }
+
         @Override
         public Symbol eval(Expression args, Environment environment) {
             List<SEPart> items = args.getItems();
-            StringBuilder goo = new StringBuilder();
+            StringBuilder result = new StringBuilder();
+            int skipped = 0;
+            result.append(prefix);
             for (Iterator<SEPart> iterator = items.iterator(); iterator.hasNext(); ) {
                 SEPart item = iterator.next();
+                if (skipped++ < skip) continue;
+
                 if (item instanceof Symbol) {
-                    goo.append(((Symbol) item).getValue());
+                    result.append(((Symbol) item).getValue());
                 } else {
-                    goo.append(evalInner((Expression) item, environment.copy()).getValue());
+                    result.append(evalInner((Expression) item, environment.copy()).getValue());
                 }
-                goo.append(" ");
+                result.append(separator);
+            }
+            if (items.size() > 1 && items.size() >= skipped) {
+                result.setLength(result.length() - 1);
             }
 
-            return new Symbol(goo.toString().trim());
+            result.append(postfix);
+            return new Symbol(result.toString().trim());
         }
     }
 
