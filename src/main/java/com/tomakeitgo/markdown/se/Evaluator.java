@@ -121,17 +121,25 @@ class Evaluator {
             result.append(prefix);
             for (Iterator<SEPart> iterator = items.iterator(); iterator.hasNext(); ) {
                 SEPart item = iterator.next();
-                if (skipped++ < skip) continue;
+                if (skipped < skip) {
+                    skipped++;
+                    continue;
+                }
 
                 if (item instanceof Symbol) {
-                    result.append(((Symbol) item).getValue());
+                    SEPart found = environment.lookupSymbol((Symbol) item);
+                    if (found instanceof Symbol) {
+                        result.append(((Symbol) found).getValue());
+                    } else {
+                        result.append(evalInner((Expression) found, environment.copy()).getValue());
+                    }
                 } else {
                     result.append(evalInner((Expression) item, environment.copy()).getValue());
                 }
                 result.append(separator);
             }
             if (items.size() > 1 && items.size() >= skipped) {
-                result.setLength(result.length() - 1);
+                result.setLength(result.length() - separator.length());
             }
 
             result.append(postfix);
