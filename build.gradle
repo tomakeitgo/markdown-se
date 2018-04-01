@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 group = 'com.tomakeitgo.markdown'
 archivesBaseName = "markdown-se"
-version = '1.0.1'
+version = '1.0.2'
 
 
 repositories {
